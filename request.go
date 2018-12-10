@@ -30,6 +30,12 @@ type Request struct {
 
 // New - функция создает новый запрос
 func New(w http.ResponseWriter, r *http.Request) (request *Request) {
+	if callbackRequest == nil {
+		callbackRequest = dummyCallbackRequest
+	}
+	if callbackResponse == nil {
+		callbackResponse = dummyCallbackResponse
+	}
 	request = &Request{
 		w:         w,
 		r:         r,
@@ -48,7 +54,10 @@ func New(w http.ResponseWriter, r *http.Request) (request *Request) {
 	if request.body != nil && len(request.body) > 0 && len(request.body) < (1<<20) {
 		l = l.WithField("body", string(request.body))
 	}
-	request.route, _ = mux.CurrentRoute(r).GetPathTemplate()
+	muxRoute := mux.CurrentRoute(r)
+	if muxRoute != nil {
+		request.route, _ = muxRoute.GetPathTemplate()
+	}
 	go callbackRequest(request.route)
 
 	l.Debug("Request")
@@ -177,4 +186,10 @@ func (r *Request) finish(code int, msg string, args ...interface{}) {
 	buf := bytes.NewBufferString(fmt.Sprintf(msg, args...))
 	r.w.Write(buf.Bytes())
 	go callbackResponse(r.route, code, time.Since(r.beginTime))
+}
+
+func dummyCallbackRequest(s string) {
+}
+
+func dummyCallbackResponse(s string, code int, duration time.Duration) {
 }
