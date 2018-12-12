@@ -95,7 +95,6 @@ func (r *Request) FinishOK(msg string, args ...interface{}) {
 	r.Log().
 		WithField("status", http.StatusOK).
 		Infof("Response: %s", fmt.Sprintf(msg, args...))
-	r.w.Header().Set("MT-Success-Request", "yes")
 	r.finish(http.StatusOK, msg, args...)
 }
 
@@ -117,6 +116,11 @@ func (r *Request) FinishError(msg string, args ...interface{}) {
 
 // FinishOKJSON функция завершает запрос с кодом 200 и объектом для JSON
 func (r *Request) FinishOKJSON(i interface{}) {
+	r.FinishJSON(http.StatusOK, i)
+}
+
+// FinishJSON функция завершает запрос с произвольным кодом и объектом для JSON
+func (r *Request) FinishJSON(code int, i interface{}) {
 	data, err := json.Marshal(i)
 	if err != nil {
 		r.Log().Errorf("Unable to marshal response data: %s", err)
@@ -124,17 +128,18 @@ func (r *Request) FinishOKJSON(i interface{}) {
 		return
 	}
 
-	r.w.Header().Set("MT-Success-Request", "yes")
 	r.w.Header().Set("Content-Type", "application/json")
-	r.w.WriteHeader(http.StatusOK)
+	r.w.WriteHeader(code)
 	if _, err := r.w.Write(data); err != nil {
 		r.Log().Warnf("Unable to write data: %s", err)
 		return
 	}
-	r.Log().
-		WithField("status", http.StatusOK).
-		WithField("body", string(data)).
-		Infof("Response")
+	ll := r.Log().
+		WithField("status", code)
+	if len(data) < 1048576 {
+		ll = ll.WithField("body", string(data))
+	}
+	ll.Infof("Response")
 	go callbackResponse(r.route, http.StatusOK, time.Since(r.beginTime))
 }
 
@@ -151,7 +156,6 @@ func (r *Request) FinishNoContent() {
 	r.Log().
 		WithField("status", http.StatusNoContent).
 		Infof("Response no content")
-	r.w.Header().Set("MT-Success-Request", "yes")
 	r.w.WriteHeader(http.StatusNoContent)
 	go callbackResponse(r.route, http.StatusNoContent, time.Since(r.beginTime))
 }
