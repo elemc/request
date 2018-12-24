@@ -65,8 +65,21 @@ func testMustMAC() error {
 	return nil
 }
 
+func testNullMAC() error {
+	expected := ""
+	value := request.Value("00:00:00:00:00:00")
+	result := value.MustMAC()
+	if result != expected {
+		return fmt.Errorf("Unexpected result: %s. Expected: empty string", result)
+	}
+	return nil
+}
+
 func TestMustMAC(t *testing.T) {
 	if err := testMustBool(); err != nil {
+		t.Fatal(err)
+	}
+	if err := testNullMAC(); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -74,6 +87,9 @@ func TestMustMAC(t *testing.T) {
 func BenchmarkMustMAC(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		if err := testMustInt(); err != nil {
+			b.Fatal(err)
+		}
+		if err := testNullMAC(); err != nil {
 			b.Fatal(err)
 		}
 	}

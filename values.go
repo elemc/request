@@ -38,5 +38,14 @@ func (rv Value) MustMAC() string {
 	if err != nil {
 		return ""
 	}
+	itsNullMAC := true
+	for _, b := range hw {
+		if b != 0 {
+			itsNullMAC = false
+		}
+	}
+	if itsNullMAC {
+		return ""
+	}
 	return fmt.Sprintf("%02x-%02x-%02x-%02x-%02x-%02x", hw[0], hw[1], hw[2], hw[3], hw[4], hw[5])
 }
