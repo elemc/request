@@ -3,6 +3,7 @@ package request_test
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/elemc/request"
 )
@@ -92,5 +93,38 @@ func BenchmarkMustMAC(b *testing.B) {
 		if err := testNullMAC(); err != nil {
 			b.Fatal(err)
 		}
+	}
+}
+
+func testMustTime() error {
+	// тест на RFC3389
+	expected := time.Date(2019, 3, 1, 12, 9, 0, 0, time.Local)
+	value := request.Value("2019-03-01T12:09:00+03:00")
+	result := value.MustTime()
+	if !expected.Equal(result) {
+		return fmt.Errorf("Unexpected result: %s. Expected %s", result, expected)
+	}
+
+	value = request.Value("1551431340")
+	result = value.MustTime()
+	if !expected.Equal(result) {
+		return fmt.Errorf("Unexpected result: %s. Expected %d", result, expected.Unix())
+	}
+
+	// тест на YYYY-MM-DD
+	loc, _ := time.LoadLocation("UTC")
+	expected = time.Date(2019, 3, 1, 0, 0, 0, 0, loc)
+	value = request.Value("2019-03-01")
+	result = value.MustTime()
+	if !expected.Equal(result) {
+		return fmt.Errorf("Unexpected result: %s. Expected %s", result, expected)
+	}
+
+	return nil
+}
+
+func TestMustTime(t *testing.T) {
+	if err := testMustTime(); err != nil {
+		t.Fatal(err)
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"strconv"
+	"time"
 )
 
 // Value - тип строки, с возможностью его преобразования в иные значения
@@ -32,7 +33,7 @@ func (rv Value) String() string {
 	return string(rv)
 }
 
-// MustMAC функция проверит и вернет MAC адрес в правильном виде или возвратит пустую строку
+// MustMAC - функция проверит и вернет MAC адрес в правильном виде или возвратит пустую строку
 func (rv Value) MustMAC() string {
 	hw, err := net.ParseMAC(rv.String())
 	if err != nil {
@@ -48,4 +49,34 @@ func (rv Value) MustMAC() string {
 		return ""
 	}
 	return fmt.Sprintf("%02x-%02x-%02x-%02x-%02x-%02x", hw[0], hw[1], hw[2], hw[3], hw[4], hw[5])
+}
+
+// MustTime - функция преобразует значение строки к значению time.Time
+func (rv Value) MustTime() time.Time {
+	var (
+		result time.Time
+		err    error
+	)
+
+	// пробуем RFC3389Nano
+	if result, err = time.Parse(time.RFC3339Nano, string(rv)); err == nil {
+		return result
+	}
+
+	// пробуем RFC3389
+	if result, err = time.Parse(time.RFC3339, string(rv)); err == nil {
+		return result
+	}
+
+	// пробуем обратный
+	if result, err = time.Parse("2006-01-02", string(rv)); err == nil {
+		return result
+	}
+
+	// пробуем преобразовать в int и интепретируем, как timestamp
+	if value, err := strconv.ParseInt(string(rv), 10, 64); err == nil && value != 0 {
+		return time.Unix(value, 0)
+	}
+
+	return time.Time{}
 }
