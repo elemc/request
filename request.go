@@ -160,6 +160,22 @@ func (r *Request) FinishNoContent() {
 	go callbackResponse(r.route, http.StatusNoContent, time.Since(r.beginTime))
 }
 
+// FinishFile - функция завершает запрос с указанным кодом,
+// передавая данные байты, как файл filename с указанным contentType
+func (r *Request) FinishFile(code int, filename, contentType string, data []byte) {
+	r.w.Header().Add("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+	r.w.Header().Add("Content-Type", contentType)
+	r.w.WriteHeader(code)
+	if _, err := r.w.Write(data); err != nil {
+		r.Log().Warnf("Unable to write data as file: %s", err)
+		return
+	}
+	ll := r.Log().
+		WithField("status", code)
+	ll.Infof("Response")
+	go callbackResponse(r.route, code, time.Since(r.beginTime))
+}
+
 // GetVar функция возвращает переменную пути по имени
 func (r *Request) GetVar(name string) string {
 	return mux.Vars(r.r)[name]
