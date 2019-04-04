@@ -19,6 +19,24 @@ func (rv Value) MustInt() int {
 	return res
 }
 
+// MustUint64 - функция для преобразования строки значения в целое число
+func (rv Value) MustUint64() uint64 {
+	res, err := strconv.ParseUint(string(rv), 10, 64)
+	if err != nil {
+		res = 0
+	}
+	return res
+}
+
+// MustInt64 - функция для преобразования строки значения в целое число
+func (rv Value) MustInt64() int64 {
+	res, err := strconv.ParseInt(string(rv), 10, 64)
+	if err != nil {
+		res = 0
+	}
+	return res
+}
+
 // MustBool - функция для преобразования строки значения в булево
 func (rv Value) MustBool() bool {
 	res, err := strconv.ParseBool(string(rv))

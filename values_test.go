@@ -15,6 +15,17 @@ func testMustInt() error {
 	if result != expected {
 		return fmt.Errorf("Unexpected result: %d. Expected: %d", result, expected)
 	}
+
+	resultUint64 := value.MustUint64()
+	if resultUint64 != uint64(expected) {
+		return fmt.Errorf("Unexpected result (uint64): %d. Expected: %d", resultUint64, expected)
+	}
+
+	resultInt64 := value.MustInt64()
+	if resultInt64 != int64(expected) {
+		return fmt.Errorf("Unexpected result (int64): %d. Expected: %d", resultInt64, expected)
+	}
+
 	return nil
 }
 
