@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"reflect"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -62,7 +63,10 @@ func New(w http.ResponseWriter, r *http.Request) (request *Request) {
 
 	// request ID
 	if value := r.Context().Value(ContextKeyRequestID); value != nil {
-		request.requestID = value.(string)
+		if reflect.TypeOf(value).Name() == "string" {
+			request.requestID = value.(string)
+		}
+		fmt.Printf("%s: %#v", reflect.TypeOf(value).Name(), value)
 	}
 	request.Log().Debugf("Used request ID: %s", request.requestID)
 
