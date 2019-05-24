@@ -61,7 +61,7 @@ func New(w http.ResponseWriter, r *http.Request) (request *Request) {
 	}
 
 	// request ID
-	if value := r.Context().Value("request_id"); value != nil {
+	if value := r.Context().Value(ContextKeyRequestID); value != nil {
 		request.requestID = value.(ContextKey)
 	}
 	request.Log().Debugf("Used request ID: %s", request.requestID)
