@@ -26,6 +26,7 @@ type Request struct {
 	beginTime time.Time
 	body      []byte
 	route     string
+	requestID string
 }
 
 // New - функция создает новый запрос
@@ -58,6 +59,12 @@ func New(w http.ResponseWriter, r *http.Request) (request *Request) {
 	if muxRoute != nil {
 		request.route, _ = muxRoute.GetPathTemplate()
 	}
+
+	// request ID
+	if value := r.Context().Value("request_id"); value != nil {
+		request.requestID = value.(string)
+	}
+
 	go callbackRequest(request.route)
 
 	l.Debug("Request")
@@ -89,11 +96,10 @@ func (r *Request) Log() *log.Entry {
 		WithField("route", r.route).
 		WithField("duration", time.Now().Sub(r.beginTime))
 
-	if value := r.r.Context().Value("request_id"); value != nil {
-		if requestID := value.(string); requestID != "" {
-			entry.WithField("request_id", requestID)
-		}
+	if r.requestID != "" {
+		entry.WithField("request_id", r.requestID)
 	}
+
 	return entry
 }
 
