@@ -80,7 +80,7 @@ func (r *Request) Log() *log.Entry {
 	if logger == nil {
 		logger = log.New()
 	}
-	return logger.
+	entry := logger.
 		WithField("method", r.r.Method).
 		WithField("host", r.r.Host).
 		WithField("proto", r.r.Proto).
@@ -88,6 +88,11 @@ func (r *Request) Log() *log.Entry {
 		WithField("request_uri", r.r.RequestURI).
 		WithField("route", r.route).
 		WithField("duration", time.Now().Sub(r.beginTime))
+
+	if requestID := r.r.Context().Value("request_id").(string); requestID != "" {
+		entry.WithField("request_id", requestID)
+	}
+	return entry
 }
 
 // FinishOK функция завершает запрос удачно с кодом 200
