@@ -155,7 +155,13 @@ func (r *Request) FinishJSON(code int, i interface{}) {
 	if len(data) < 1048576 {
 		ll = ll.WithField("body", string(data))
 	}
-	ll.Infof("Response")
+	if code < 300 {
+		ll.Info("Response")
+	} else if code >= 300 && code < 500 {
+		ll.Warn("Response")
+	} else {
+		ll.Error("Response")
+	}
 	go callbackResponse(r.route, http.StatusOK, time.Since(r.beginTime))
 }
 
