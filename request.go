@@ -66,9 +66,7 @@ func New(w http.ResponseWriter, r *http.Request) (request *Request) {
 		if reflect.TypeOf(value).Name() == "string" {
 			request.requestID = value.(string)
 		}
-		fmt.Printf("%s: %#v", reflect.TypeOf(value).Name(), value)
 	}
-	request.Log().Debugf("Used request ID: %s", request.requestID)
 
 	go callbackRequest(request.route)
 
@@ -102,7 +100,7 @@ func (r *Request) Log() *log.Entry {
 		WithField("duration", time.Now().Sub(r.beginTime))
 
 	if r.requestID != "" {
-		entry.WithField("request_id", r.requestID)
+		entry = entry.WithField("request_id", r.requestID)
 	}
 
 	return entry
