@@ -52,10 +52,7 @@ func New(w http.ResponseWriter, r *http.Request) (request *Request) {
 			r.Body = ioutil.NopCloser(bytes.NewReader(request.body))
 		}
 	}
-	l := request.Log()
-	if request.body != nil && len(request.body) > 0 && len(request.body) < (1<<20) {
-		l = l.WithField("body", string(request.body))
-	}
+
 	muxRoute := mux.CurrentRoute(r)
 	if muxRoute != nil {
 		request.route, _ = muxRoute.GetPathTemplate()
@@ -70,7 +67,7 @@ func New(w http.ResponseWriter, r *http.Request) (request *Request) {
 
 	go callbackRequest(request.route)
 
-	l.Debug("Request")
+	request.Log().Debug("Request")
 	return
 }
 
@@ -98,6 +95,10 @@ func (r *Request) Log() *log.Entry {
 		WithField("request_uri", r.r.RequestURI).
 		WithField("route", r.route).
 		WithField("duration", time.Now().Sub(r.beginTime))
+
+	if r.body != nil && len(r.body) > 0 && len(r.body) < (1<<20) {
+		entry = entry.WithField("request_body", string(r.body))
+	}
 
 	if r.requestID != "" {
 		entry = entry.WithField("request_id", r.requestID)
