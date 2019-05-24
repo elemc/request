@@ -26,7 +26,7 @@ type Request struct {
 	beginTime time.Time
 	body      []byte
 	route     string
-	requestID string
+	requestID ContextKey
 }
 
 // New - функция создает новый запрос
@@ -62,7 +62,7 @@ func New(w http.ResponseWriter, r *http.Request) (request *Request) {
 
 	// request ID
 	if value := r.Context().Value("request_id"); value != nil {
-		request.requestID = value.(string)
+		request.requestID = value.(ContextKey)
 	}
 
 	go callbackRequest(request.route)
