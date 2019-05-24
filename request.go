@@ -89,8 +89,10 @@ func (r *Request) Log() *log.Entry {
 		WithField("route", r.route).
 		WithField("duration", time.Now().Sub(r.beginTime))
 
-	if requestID := r.r.Context().Value("request_id").(string); requestID != "" {
-		entry.WithField("request_id", requestID)
+	if value := r.r.Context().Value("request_id"); value != nil {
+		if requestID := value.(string); requestID != "" {
+			entry.WithField("request_id", requestID)
+		}
 	}
 	return entry
 }
