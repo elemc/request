@@ -163,7 +163,7 @@ func (r *Request) FinishJSON(code int, i interface{}) {
 	} else {
 		ll.Error("Response")
 	}
-	go callbackResponse(r.route, http.StatusOK, time.Since(r.beginTime))
+	go callbackResponse(r.route, code, time.Since(r.beginTime))
 }
 
 // Finish функция завершает запрос с введенным кодом
