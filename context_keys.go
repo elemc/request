@@ -7,4 +7,5 @@ type ContextKey string
 const (
 	ContextKeyRequestID       ContextKey = "request_id"
 	ContextKeySessionUsername ContextKey = "session_username"
+	ContextKeySessionToken    ContextKey = "session_token"
 )
