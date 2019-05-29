@@ -2,12 +2,12 @@ package request
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"reflect"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -27,7 +27,7 @@ type Request struct {
 	beginTime time.Time
 	body      []byte
 	route     string
-	requestID string
+	ctx       context.Context
 }
 
 // New - функция создает новый запрос
@@ -58,12 +58,8 @@ func New(w http.ResponseWriter, r *http.Request) (request *Request) {
 		request.route, _ = muxRoute.GetPathTemplate()
 	}
 
-	// request ID
-	if value := r.Context().Value(ContextKeyRequestID); value != nil {
-		if reflect.TypeOf(value).Name() == "string" {
-			request.requestID = value.(string)
-		}
-	}
+	// context
+	request.ctx = r.Context()
 
 	go callbackRequest(request.route)
 
@@ -100,8 +96,14 @@ func (r *Request) Log() *log.Entry {
 		entry = entry.WithField("request_body", string(r.body))
 	}
 
-	if r.requestID != "" {
-		entry = entry.WithField("request_id", r.requestID)
+	if reqID := r.RequestID(); reqID != "" {
+		entry = entry.WithField("request_id", reqID)
+	}
+	if user := r.SessionUsername(); user != "" {
+		entry = entry.WithField("username", user)
+	}
+	if token := r.SessionToken(); token != "" {
+		entry = entry.WithField("token", token)
 	}
 
 	return entry
@@ -235,4 +237,14 @@ func dummyCallbackRequest(s string) {
 }
 
 func dummyCallbackResponse(s string, code int, duration time.Duration) {
+}
+
+// Context - функция возвращает контекст запроса
+func (r *Request) Context() context.Context {
+	return r.ctx
+}
+
+// SetContext - фукция устанавливает контекст запроса
+func (r *Request) SetContext(ctx context.Context) {
+	r.ctx = ctx
 }
