@@ -96,13 +96,13 @@ func (r *Request) Log() *log.Entry {
 		entry = entry.WithField("request_body", string(r.body))
 	}
 
-	if reqID := r.RequestID(); reqID != "" {
+	if reqID := r.ctx.RequestID(); reqID != "" {
 		entry = entry.WithField("request_id", reqID)
 	}
-	if user := r.SessionUsername(); user != "" {
+	if user := r.ctx.SessionUsername(); user != "" {
 		entry = entry.WithField("username", user)
 	}
-	if token := r.SessionToken(); token != "" {
+	if token := r.ctx.SessionToken(); token != "" {
 		entry = entry.WithField("token", token)
 	}
 

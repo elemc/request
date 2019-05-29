@@ -24,6 +24,11 @@ func NewContext(ctx context.Context) *Context {
 	}
 }
 
+// Context - возвращает типовой контекст
+func (ctx *Context) Context() context.Context {
+	return ctx.ctx
+}
+
 // Функция извлекает из контекста информацию о требуемом ключе
 func (ctx *Context) contextFetchStringValue(key ContextKey) string {
 	if ctx.ctx == nil {
