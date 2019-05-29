@@ -5,5 +5,6 @@ type ContextKey string
 
 // ключи контекста
 const (
-	ContextKeyRequestID ContextKey = "request_id"
+	ContextKeyRequestID       ContextKey = "request_id"
+	ContextKeySessionUsername ContextKey = "session_username"
 )
