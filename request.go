@@ -27,7 +27,7 @@ type Request struct {
 	beginTime time.Time
 	body      []byte
 	route     string
-	ctx       context.Context
+	ctx       *Context
 }
 
 // New - функция создает новый запрос
@@ -59,7 +59,7 @@ func New(w http.ResponseWriter, r *http.Request) (request *Request) {
 	}
 
 	// context
-	request.ctx = r.Context()
+	request.ctx = NewContext(r.Context())
 
 	go callbackRequest(request.route)
 
@@ -240,11 +240,11 @@ func dummyCallbackResponse(s string, code int, duration time.Duration) {
 }
 
 // Context - функция возвращает контекст запроса
-func (r *Request) Context() context.Context {
+func (r *Request) Context() *Context {
 	return r.ctx
 }
 
 // SetContext - фукция устанавливает контекст запроса
 func (r *Request) SetContext(ctx context.Context) {
-	r.ctx = ctx
+	r.ctx = NewContext(ctx)
 }
