@@ -30,7 +30,7 @@ func (mw *mockWriter) WriteHeader(statusCode int) {
 	//fmt.Printf("Status code: %d\n", statusCode)
 }
 
-func testRequst() (err error) {
+func testRequest() (err error) {
 	handler := func(w http.ResponseWriter, r *http.Request) {}
 	logrus.SetLevel(logrus.ErrorLevel)
 	request.Setup(logrus.StandardLogger(), nil, nil)
@@ -68,14 +68,14 @@ func testRequst() (err error) {
 }
 
 func TestRequest(t *testing.T) {
-	if err := testRequst(); err != nil {
+	if err := testRequest(); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func BenchmarkRequest(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		if err := testRequst(); err != nil {
+		if err := testRequest(); err != nil {
 			b.Fatal(err)
 		}
 	}

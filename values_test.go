@@ -13,17 +13,17 @@ func testMustInt() error {
 	value := request.Value("12345")
 	result := value.MustInt()
 	if result != expected {
-		return fmt.Errorf("Unexpected result: %d. Expected: %d", result, expected)
+		return fmt.Errorf("unexpected result: %d. Expected: %d", result, expected)
 	}
 
 	resultUint64 := value.MustUint64()
 	if resultUint64 != uint64(expected) {
-		return fmt.Errorf("Unexpected result (uint64): %d. Expected: %d", resultUint64, expected)
+		return fmt.Errorf("unexpected result (uint64): %d. Expected: %d", resultUint64, expected)
 	}
 
 	resultInt64 := value.MustInt64()
 	if resultInt64 != int64(expected) {
-		return fmt.Errorf("Unexpected result (int64): %d. Expected: %d", resultInt64, expected)
+		return fmt.Errorf("unexpected result (int64): %d. Expected: %d", resultInt64, expected)
 	}
 
 	return nil
@@ -44,11 +44,10 @@ func BenchmarkMustInt(b *testing.B) {
 }
 
 func testMustBool() error {
-	expected := true
 	value := request.Value("true")
 	result := value.MustBool()
-	if result != expected {
-		return fmt.Errorf("Unexpected result: %t. Expected: %t", result, expected)
+	if !result {
+		return fmt.Errorf("unexpected result: %t. Expected: true", result)
 	}
 	return nil
 }
@@ -72,7 +71,7 @@ func testMustMAC() error {
 	value := request.Value("74:E1:B6:6D:1D:58")
 	result := value.MustMAC()
 	if result != expected {
-		return fmt.Errorf("Unexpected result: %s. Expected: %s", result, expected)
+		return fmt.Errorf("unexpected result: %s. Expected: %s", result, expected)
 	}
 	return nil
 }
@@ -82,7 +81,7 @@ func testNullMAC() error {
 	value := request.Value("00:00:00:00:00:00")
 	result := value.MustMAC()
 	if result != expected {
-		return fmt.Errorf("Unexpected result: %s. Expected: empty string", result)
+		return fmt.Errorf("unexpected result: %s. Expected: empty string", result)
 	}
 	return nil
 }
@@ -92,6 +91,9 @@ func TestMustMAC(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := testNullMAC(); err != nil {
+		t.Fatal(err)
+	}
+	if err := testMustMAC(); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -104,6 +106,9 @@ func BenchmarkMustMAC(b *testing.B) {
 		if err := testNullMAC(); err != nil {
 			b.Fatal(err)
 		}
+		if err := testMustMAC(); err != nil {
+			b.Fatal(err)
+		}
 	}
 }
 
@@ -113,13 +118,13 @@ func testMustTime() error {
 	value := request.Value("2019-03-01T12:09:00+03:00")
 	result := value.MustTime()
 	if !expected.Equal(result) {
-		return fmt.Errorf("Unexpected result: %s. Expected %s", result, expected)
+		return fmt.Errorf("unexpected result: %s. Expected %s", result, expected)
 	}
 
 	value = request.Value("1551431340")
 	result = value.MustTime()
 	if !expected.Equal(result) {
-		return fmt.Errorf("Unexpected result: %s. Expected %d", result, expected.Unix())
+		return fmt.Errorf("unexpected result: %s. Expected %d", result, expected.Unix())
 	}
 
 	// тест на YYYY-MM-DD
@@ -128,7 +133,7 @@ func testMustTime() error {
 	value = request.Value("2019-03-01")
 	result = value.MustTime()
 	if !expected.Equal(result) {
-		return fmt.Errorf("Unexpected result: %s. Expected %s", result, expected)
+		return fmt.Errorf("unexpected result: %s. Expected %s", result, expected)
 	}
 
 	return nil

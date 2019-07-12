@@ -34,8 +34,8 @@ func (ctx *Context) contextFetchStringValue(key ContextKey) string {
 	if ctx.ctx == nil {
 		return ""
 	}
-	if ivalue := ctx.ctx.Value(key); ivalue != nil {
-		res, ok := ivalue.(string)
+	if value := ctx.ctx.Value(key); value != nil {
+		res, ok := value.(string)
 		if ok {
 			return res
 		}
