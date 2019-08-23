@@ -265,3 +265,9 @@ func (r *Request) Context() *Context {
 func (r *Request) SetContext(ctx context.Context) {
 	r.ctx = NewContext(ctx)
 }
+
+// FinishRedirect - функция завершает вызов запроса указанным редиректом
+func (r *Request) FinishRedirect(code int, redirect string) {
+	http.Redirect(r.w, r.r, redirect, code)
+	go callbackResponse(r.getMetricsFieldRoute(), code, time.Since(r.beginTime))
+}
