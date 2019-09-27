@@ -122,6 +122,12 @@ func (r *Request) Log() *log.Entry {
 	if token := r.ctx.SessionToken(); token != "" {
 		entry = entry.WithField("token", token)
 	}
+	if query := r.Query().Encode(); query != "" {
+		entry = entry.WithField("query_args", query)
+	}
+	if formData := r.r.Form.Encode(); formData != "" {
+		entry = entry.WithField("form_data", formData)
+	}
 
 	return entry
 }
