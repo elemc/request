@@ -151,7 +151,7 @@ func (r *Request) FinishBadRequest(msg string, args ...interface{}) {
 // FinishError функция завершает запрос неудачно с кодом 500
 func (r *Request) FinishError(msg string, args ...interface{}) {
 	r.Log().
-		WithField("status", http.StatusOK).
+		WithField("status", http.StatusInternalServerError).
 		Errorf("Response: %s", fmt.Sprintf(msg, args...))
 	r.finish(http.StatusInternalServerError, msg, args...)
 }
