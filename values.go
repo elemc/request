@@ -61,6 +61,7 @@ func (rv Value) MustMAC() string {
 	for _, b := range hw {
 		if b != 0 {
 			itsNullMAC = false
+			break
 		}
 	}
 	if itsNullMAC {
