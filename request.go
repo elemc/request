@@ -19,6 +19,10 @@ var (
 	callbackRequest    func(string)
 	callbackResponse   func(string, int, time.Duration)
 	metricsWithMethods bool
+
+	// Настройки для вывода body в логах
+	LogBody bool
+	BodyLimit = 1048576
 )
 
 // Request - структура для работы с запросом
@@ -178,7 +182,7 @@ func (r *Request) FinishJSON(code int, i interface{}) {
 	}
 	ll := r.Log().
 		WithField("status", code)
-	if len(data) < 1048576 {
+	if LogBody && len(data) < BodyLimit {
 		ll = ll.WithField("body", string(data))
 	}
 	if code < 300 {
