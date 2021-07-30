@@ -21,7 +21,7 @@ var (
 	metricsWithMethods bool
 
 	// Настройки для вывода body в логах
-	LogBody bool
+	LogBody = true
 	BodyLimit = 1048576
 )
 
