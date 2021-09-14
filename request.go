@@ -192,6 +192,10 @@ func (r *Request) FinishJSON(code int, i interface{}) {
 	}
 	ll := r.Log().
 		WithField("status", code)
+	if logBody && len(data) < bodyLimit {
+		ll = ll.WithField("response_body", string(data))
+	}
+
 	if code < 300 {
 		ll.Info("Response")
 	} else if code >= 300 && code < 500 {
