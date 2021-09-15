@@ -14,6 +14,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	// DefaultBodySize - стандартное ограничение в 1мб для вывода body запроса в logger
+	DefaultBodySize = 1<<20
+)
+
 var (
 	logger             *log.Logger
 	callbackRequest    func(string)
@@ -21,8 +26,8 @@ var (
 	metricsWithMethods bool
 
 	// Настройки для вывода body в логах
-	LogBody = true
-	BodyLimit = 1048576
+	logBody = true
+	bodyLimit = DefaultBodySize
 )
 
 // Request - структура для работы с запросом
@@ -77,10 +82,15 @@ func New(w http.ResponseWriter, r *http.Request) (request *Request) {
 //noinspection ALL
 func Setup(
 	l *log.Logger,
+	showBodyInLogger bool,
+	bodyMaxSizeInLogger int,
 	req func(string),
 	resp func(string, int, time.Duration),
 ) {
 	logger = l
+	logBody = showBodyInLogger
+	bodyLimit = bodyMaxSizeInLogger
+
 	callbackRequest = req
 	callbackResponse = resp
 }
@@ -113,7 +123,7 @@ func (r *Request) Log() *log.Entry {
 		WithField("route", r.route).
 		WithField("duration", time.Now().Sub(r.beginTime))
 
-	if r.body != nil && len(r.body) > 0 && len(r.body) < (1<<20) {
+	if logBody && r.body != nil && len(r.body) > 0 && len(r.body) < bodyLimit {
 		entry = entry.WithField("request_body", string(r.body))
 	}
 
@@ -182,9 +192,10 @@ func (r *Request) FinishJSON(code int, i interface{}) {
 	}
 	ll := r.Log().
 		WithField("status", code)
-	if LogBody && len(data) < BodyLimit {
-		ll = ll.WithField("body", string(data))
+	if logBody && len(data) < bodyLimit {
+		ll = ll.WithField("response_body", string(data))
 	}
+
 	if code < 300 {
 		ll.Info("Response")
 	} else if code >= 300 && code < 500 {
