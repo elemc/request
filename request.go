@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"sync"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -78,6 +79,8 @@ func New(w http.ResponseWriter, r *http.Request) (request *Request) {
 	return
 }
 
+var initializer sync.Once
+
 // Setup - функция устанавливает логгер и коллбэки
 //noinspection ALL
 func Setup(
@@ -86,13 +89,24 @@ func Setup(
 	bodyMaxSizeInLogger int,
 	req func(string),
 	resp func(string, int, time.Duration),
-) {
-	logger = l
-	logBody = showBodyInLogger
-	bodyLimit = bodyMaxSizeInLogger
+) error {
 
-	callbackRequest = req
-	callbackResponse = resp
+	// мы определеям ошибку по умолчанию
+	var err error = errInitializedAlready
+
+	initializer.Do(func() {
+		logger = l
+		logBody = showBodyInLogger
+		bodyLimit = bodyMaxSizeInLogger
+
+		callbackRequest = req
+		callbackResponse = resp
+
+		// зануляем ошибку
+		err = nil
+	})
+
+	return err
 }
 
 // ShowMethodsInMetrics - включает или отключает показ методов в метриках
