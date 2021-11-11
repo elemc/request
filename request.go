@@ -17,7 +17,7 @@ import (
 
 const (
 	// DefaultBodySize - стандартное ограничение в 1мб для вывода body запроса в logger
-	DefaultBodySize = 1<<20
+	DefaultBodySize = 1 << 20
 )
 
 var (
@@ -27,7 +27,7 @@ var (
 	metricsWithMethods bool
 
 	// Настройки для вывода body в логах
-	logBody = true
+	logBody   = true
 	bodyLimit = DefaultBodySize
 )
 
@@ -198,7 +198,9 @@ func (r *Request) FinishJSON(code int, i interface{}) {
 		return
 	}
 
-	r.w.Header().Set("Content-Type", "application/json")
+	if r.w.Header().Get("Content-Type") == "" {
+		r.w.Header().Set("Content-Type", "application/json")
+	}
 	r.w.WriteHeader(code)
 	if _, err := r.w.Write(data); err != nil {
 		r.Log().Warnf("Unable to write data: %s", err)

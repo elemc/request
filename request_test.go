@@ -33,7 +33,8 @@ func (mw *mockWriter) WriteHeader(statusCode int) {
 func testRequest() (err error) {
 	handler := func(w http.ResponseWriter, r *http.Request) {}
 	logrus.SetLevel(logrus.ErrorLevel)
-	request.Setup(logrus.StandardLogger(), nil, nil)
+	request.Setup(logrus.StandardLogger(), false, request.DefaultBodySize,
+		nil, nil)
 
 	router := mux.NewRouter()
 	router.HandleFunc("/test/uri", handler)
