@@ -20,10 +20,15 @@ const (
 	DefaultBodySize = 1 << 20
 )
 
+type (
+	metricTotalRequests    func(path, method string)
+	metricDurationResponse func(path, method string, status int, dur time.Duration)
+)
+
 var (
 	logger             *log.Logger
-	callbackRequest    func(string)
-	callbackResponse   func(string, int, time.Duration)
+	callbackRequest    metricTotalRequests
+	callbackResponse   metricDurationResponse
 	metricsWithMethods bool
 
 	// Настройки для вывода body в логах
@@ -73,7 +78,7 @@ func New(w http.ResponseWriter, r *http.Request) (request *Request) {
 	// context
 	request.ctx = NewContext(r.Context())
 
-	go callbackRequest(request.getMetricsFieldRoute())
+	go callbackRequest(request.route, request.r.Method)
 
 	request.Log().Debug("Request")
 	return
@@ -87,8 +92,8 @@ func Setup(
 	l *log.Logger,
 	showBodyInLogger bool,
 	bodyMaxSizeInLogger int,
-	req func(string),
-	resp func(string, int, time.Duration),
+	req metricTotalRequests,
+	resp metricDurationResponse,
 ) error {
 
 	// мы определеям ошибку по умолчанию
@@ -113,14 +118,6 @@ func Setup(
 //noinspection GoUnusedExportedFunction
 func ShowMethodsInMetrics(enabled bool) {
 	metricsWithMethods = enabled
-}
-
-func (r *Request) getMetricsFieldRoute() string {
-	metricsMsg := r.route
-	if metricsWithMethods {
-		metricsMsg = r.r.Method + " " + r.route
-	}
-	return metricsMsg
 }
 
 // Log - функция возвращает обогащенный logger для запроса
@@ -219,7 +216,7 @@ func (r *Request) FinishJSON(code int, i interface{}) {
 	} else {
 		ll.Error("Response")
 	}
-	go callbackResponse(r.getMetricsFieldRoute(), code, time.Since(r.beginTime))
+	go callbackResponse(r.route, r.r.Method, code, time.Since(r.beginTime))
 }
 
 // Finish функция завершает запрос с введенным кодом
@@ -236,7 +233,7 @@ func (r *Request) FinishNoContent() {
 		WithField("status", http.StatusNoContent).
 		Infof("Response no content")
 	r.w.WriteHeader(http.StatusNoContent)
-	go callbackResponse(r.getMetricsFieldRoute(), http.StatusNoContent, time.Since(r.beginTime))
+	go callbackResponse(r.route, r.r.Method, http.StatusNoContent, time.Since(r.beginTime))
 }
 
 // FinishFile - функция завершает запрос с указанным кодом,
@@ -252,7 +249,7 @@ func (r *Request) FinishFile(code int, filename, contentType string, data []byte
 	ll := r.Log().
 		WithField("status", code)
 	ll.Infof("Response")
-	go callbackResponse(r.getMetricsFieldRoute(), code, time.Since(r.beginTime))
+	go callbackResponse(r.route, r.r.Method, code, time.Since(r.beginTime))
 }
 
 // GetVar функция возвращает переменную пути по имени
@@ -284,13 +281,13 @@ func (r *Request) finish(code int, msg string, args ...interface{}) {
 	r.w.WriteHeader(code)
 	buf := bytes.NewBufferString(fmt.Sprintf(msg, args...))
 	r.w.Write(buf.Bytes())
-	go callbackResponse(r.getMetricsFieldRoute(), code, time.Since(r.beginTime))
+	go callbackResponse(r.route, r.r.Method, code, time.Since(r.beginTime))
 }
 
-func dummyCallbackRequest(_ string) {
+func dummyCallbackRequest(_, _ string) {
 }
 
-func dummyCallbackResponse(_ string, _ int, _ time.Duration) {
+func dummyCallbackResponse(_, _ string, _ int, _ time.Duration) {
 }
 
 // Context - функция возвращает контекст запроса
@@ -306,5 +303,5 @@ func (r *Request) SetContext(ctx context.Context) {
 // FinishRedirect - функция завершает вызов запроса указанным редиректом
 func (r *Request) FinishRedirect(code int, redirect string) {
 	http.Redirect(r.w, r.r, redirect, code)
-	go callbackResponse(r.getMetricsFieldRoute(), code, time.Since(r.beginTime))
+	go callbackResponse(r.route, r.r.Method, code, time.Since(r.beginTime))
 }
