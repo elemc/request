@@ -84,6 +84,11 @@ func New(w http.ResponseWriter, r *http.Request) (request *Request) {
 	return
 }
 
+// GetURL возвращает URL запроса
+func (r *Request) GetURL() *url.URL {
+	return r.r.URL
+}
+
 var initializer sync.Once
 
 // Setup - функция устанавливает логгер и коллбэки
