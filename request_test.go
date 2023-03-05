@@ -9,9 +9,8 @@ import (
 	"testing"
 
 	"github.com/sirupsen/logrus"
-
-	"github.com/elemc/request"
 	"github.com/gorilla/mux"
+
 )
 
 type mockWriter struct{}
