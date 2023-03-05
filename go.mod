@@ -1,4 +1,4 @@
-module github.com/elem/request
+module github.com/elemc/request
 
 go 1.16
 
