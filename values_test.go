@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elemc/request"
 )
 
 func testMustInt() error {
